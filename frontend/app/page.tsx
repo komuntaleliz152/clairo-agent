@@ -1,12 +1,15 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { useState } from "react";
+import AppHeader from "@/components/AppHeader";
 import ResearchForm from "@/components/ResearchForm";
 import ResearchReport from "@/components/ResearchReport";
 import LoadingState, { type ResearchStepId } from "@/components/LoadingState";
 import { runResearchStream, type Source } from "@/lib/api";
 
 export default function Home() {
+  const { getToken, isLoaded } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState<ResearchStepId>("searching");
   const [loadingMessage, setLoadingMessage] = useState<string | undefined>();
@@ -15,6 +18,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const handleResearch = async (topic: string) => {
+    if (!isLoaded) return;
+
+    const token = await getToken();
+    if (!token) {
+      setError("Please sign in to start research.");
+      return;
+    }
+
     setIsLoading(true);
     setLoadingStep("searching");
     setLoadingMessage("Starting research...");
@@ -23,16 +34,20 @@ export default function Home() {
     setSources([]);
 
     try {
-      const data = await runResearchStream(topic, (progress) => {
-        if (progress.message) setLoadingMessage(progress.message);
-        if (
-          progress.step === "searching" ||
-          progress.step === "analyzing" ||
-          progress.step === "generating"
-        ) {
-          setLoadingStep(progress.step);
-        }
-      });
+      const data = await runResearchStream(
+        topic,
+        (progress) => {
+          if (progress.message) setLoadingMessage(progress.message);
+          if (
+            progress.step === "searching" ||
+            progress.step === "analyzing" ||
+            progress.step === "generating"
+          ) {
+            setLoadingStep(progress.step);
+          }
+        },
+        token
+      );
       setReport(data.report);
       setSources(data.sources ?? []);
     } catch (err) {
@@ -44,7 +59,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 right-0 h-[480px] w-[480px] rounded-full bg-brand-200/40 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-violet-200/30 blur-3xl" />
@@ -57,22 +71,7 @@ export default function Home() {
         />
       </div>
 
-      {/* Header */}
-      <header className="border-b border-slate-200/60 bg-white/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white shadow-md shadow-brand-600/30">
-              C
-            </div>
-            <div>
-              <p className="font-[family-name:var(--font-fraunces)] text-lg font-semibold leading-tight text-slate-900">
-                Clairo
-              </p>
-              <p className="text-xs text-slate-500">AI Research Agent</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         <section className="mb-10 text-center">

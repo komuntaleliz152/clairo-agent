@@ -23,19 +23,31 @@ export interface ResearchProgress {
   status?: string;
 }
 
+function authHeaders(token: string | null): HeadersInit {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 async function parseError(response: Response): Promise<string> {
   const body = await response.json().catch(() => null);
   if (body && typeof body.detail === "string") return body.detail;
+  if (response.status === 401) return "Please sign in to run research.";
   return "Failed to generate research report";
 }
 
 export async function runResearchStream(
   topic: string,
-  onProgress: (progress: ResearchProgress) => void
+  onProgress: (progress: ResearchProgress) => void,
+  token: string | null
 ): Promise<ResearchResult> {
   const response = await fetch(`${API_BASE_URL}/api/research/stream`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders(token),
     body: JSON.stringify({ topic }),
   });
 
@@ -89,11 +101,13 @@ export async function runResearchStream(
   return result;
 }
 
-/** Non-streaming fallback */
-export async function runResearch(topic: string): Promise<ResearchResult> {
+export async function runResearch(
+  topic: string,
+  token: string | null
+): Promise<ResearchResult> {
   const response = await fetch(`${API_BASE_URL}/api/research`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders(token),
     body: JSON.stringify({ topic }),
   });
 

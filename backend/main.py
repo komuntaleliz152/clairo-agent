@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
@@ -6,6 +6,7 @@ import json
 import os
 
 from models.schemas import ResearchRequest, ResearchResponse
+from services.auth import require_user
 from services.research_service import ResearchService
 
 load_dotenv()
@@ -49,15 +50,22 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    from services.auth import _auth_disabled, _get_issuer
+
     return {
         "status": "healthy",
         "api_key_configured": bool(os.getenv("GROQ_API_KEY")),
         "search_provider": "tavily" if os.getenv("TAVILY_API_KEY") else "duckduckgo",
+        "auth_enabled": bool(_get_issuer()) and not _auth_disabled(),
+        "auth_dev_mode": _auth_disabled(),
     }
 
 
 @app.post("/api/research", response_model=ResearchResponse)
-async def research(request: ResearchRequest):
+async def research(
+    request: ResearchRequest,
+    user: dict = Depends(require_user),
+):
     if not os.getenv("GROQ_API_KEY"):
         raise HTTPException(
             status_code=503,
@@ -71,7 +79,10 @@ async def research(request: ResearchRequest):
 
 
 @app.post("/api/research/stream")
-async def research_stream(request: ResearchRequest):
+async def research_stream(
+    request: ResearchRequest,
+    user: dict = Depends(require_user),
+):
     if not os.getenv("GROQ_API_KEY"):
         raise HTTPException(
             status_code=503,

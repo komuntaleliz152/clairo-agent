@@ -12,5 +12,7 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://clairo-research-agent.vercel.app
+      - key: CLERK_ISSUER
+        sync: false
       - key: PYTHON_VERSION
         value: "3.11.9"
