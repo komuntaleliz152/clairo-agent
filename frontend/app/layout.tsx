@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { ClerkShell } from "@/components/ClerkShell";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -31,7 +31,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full font-sans" suppressHydrationWarning>
-        <ClerkProvider>{children}</ClerkProvider>
+        <ClerkShell>{children}</ClerkShell>
       </body>
     </html>
   );

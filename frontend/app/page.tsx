@@ -1,15 +1,16 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useState } from "react";
 import AppHeader from "@/components/AppHeader";
+import { useOptionalAuth } from "@/components/ClerkShell";
 import ResearchForm from "@/components/ResearchForm";
 import ResearchReport from "@/components/ResearchReport";
 import LoadingState, { type ResearchStepId } from "@/components/LoadingState";
+import { isClerkConfigured } from "@/lib/clerk";
 import { runResearchStream, type Source } from "@/lib/api";
 
 export default function Home() {
-  const { getToken, isLoaded } = useAuth();
+  const { getToken, isLoaded } = useOptionalAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState<ResearchStepId>("searching");
   const [loadingMessage, setLoadingMessage] = useState<string | undefined>();
@@ -21,10 +22,6 @@ export default function Home() {
     if (!isLoaded) return;
 
     const token = await getToken();
-    if (!token) {
-      setError("Please sign in to start research.");
-      return;
-    }
 
     setIsLoading(true);
     setLoadingStep("searching");
@@ -74,6 +71,13 @@ export default function Home() {
       <AppHeader />
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+        {!isClerkConfigured() && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Auth is optional in dev: add Clerk keys to <code>.env.local</code> or set{" "}
+            <code>DISABLE_AUTH=true</code> on the backend. See AUTH.md.
+          </div>
+        )}
+
         <section className="mb-10 text-center">
           <h1 className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             Research any topic in minutes

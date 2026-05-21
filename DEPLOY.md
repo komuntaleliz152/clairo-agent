@@ -13,7 +13,15 @@
 
 > Free Render services sleep after ~15 min idle; first request may take 30–60s to wake.
 
-## 2. Connect Vercel frontend
+## 2. Set up Clerk (authentication)
+
+See **[AUTH.md](./AUTH.md)** for full steps. You need:
+
+- Clerk app with Email + Google enabled
+- `CLERK_ISSUER` on Render
+- Clerk keys on Vercel (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`)
+
+## 3. Connect Vercel frontend
 
 1. Open [vercel.com](https://vercel.com) → your **clairo-research-agent** project.
 2. **Settings** → **Environment Variables**.
@@ -24,7 +32,7 @@
    (no trailing slash)
 4. **Deployments** → redeploy **Production**.
 
-## 3. Verify
+## 4. Verify
 
 - Backend: `https://YOUR-RENDER-URL.onrender.com/health` → `"status": "healthy"`
 - Frontend: run a research topic on the live Vercel URL.

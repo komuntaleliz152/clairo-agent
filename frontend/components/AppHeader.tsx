@@ -1,6 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
+import { isClerkConfigured } from "@/lib/clerk";
 
 export default function AppHeader() {
   return (
@@ -17,14 +18,18 @@ export default function AppHeader() {
             <p className="text-xs text-slate-500">AI Research Agent</p>
           </div>
         </div>
-        <UserButton
-          afterSignOutUrl="/sign-in"
-          appearance={{
-            elements: {
-              avatarBox: "h-9 w-9",
-            },
-          }}
-        />
+        {isClerkConfigured() ? (
+          <UserButton
+            afterSignOutUrl="/sign-in"
+            appearance={{
+              elements: { avatarBox: "h-9 w-9" },
+            }}
+          />
+        ) : (
+          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-200">
+            Auth not configured
+          </span>
+        )}
       </div>
     </header>
   );
