@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
+import json
 import os
 
 from models.schemas import ResearchRequest, ResearchResponse
@@ -15,14 +17,19 @@ app = FastAPI(
 )
 
 frontend_origins = [
-    os.getenv("FRONTEND_URL", "http://localhost:3000"),
-    "http://localhost:3000",
-    "https://clairo-research-agent.vercel.app",
+    o
+    for o in [
+        os.getenv("FRONTEND_URL", "http://localhost:3000"),
+        "http://localhost:3000",
+        "https://clairo-research-agent.vercel.app",
+    ]
+    if o
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list({o for o in frontend_origins if o}),
+    allow_origins=frontend_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,8 +70,57 @@ async def research(request: ResearchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/research/stream")
+async def research_stream(request: ResearchRequest):
+    if not os.getenv("GROQ_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail="GROQ_API_KEY is not configured. Add it to backend/.env",
+        )
+
+    async def event_stream():
+        try:
+            async for chunk in research_service.run_research_stream(request.topic):
+                yield chunk
+        except Exception as e:
+            yield f"data: {json.dumps({'step': 'error', 'message': str(e)})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+def _is_port_taken(port: int) -> bool:
+    """Check if something is already listening (avoids Windows bind-then-release races)."""
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        return sock.connect_ex(("127.0.0.1", port)) == 0
+
+
+def _pick_port(preferred: int) -> int:
+    for port in range(preferred, preferred + 10):
+        if not _is_port_taken(port):
+            return port
+    raise RuntimeError(f"No free port found near {preferred}")
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+    preferred = int(os.getenv("PORT", 8000))
+    port = _pick_port(preferred)
+    if port != preferred:
+        print(
+            f"Port {preferred} is busy — using http://localhost:{port} instead",
+            flush=True,
+        )
+        print(
+            f"Set NEXT_PUBLIC_API_URL=http://localhost:{port} in frontend/.env.local",
+            flush=True,
+        )
+    else:
+        print(f"API ready at http://localhost:{port}", flush=True)
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=False)

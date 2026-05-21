@@ -3,23 +3,36 @@
 import { useState } from "react";
 import ResearchForm from "@/components/ResearchForm";
 import ResearchReport from "@/components/ResearchReport";
-import LoadingState from "@/components/LoadingState";
-import { runResearch, type Source } from "@/lib/api";
+import LoadingState, { type ResearchStepId } from "@/components/LoadingState";
+import { runResearchStream, type Source } from "@/lib/api";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState<ResearchStepId>("searching");
+  const [loadingMessage, setLoadingMessage] = useState<string | undefined>();
   const [report, setReport] = useState<string | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleResearch = async (topic: string) => {
     setIsLoading(true);
+    setLoadingStep("searching");
+    setLoadingMessage("Starting research...");
     setError(null);
     setReport(null);
     setSources([]);
 
     try {
-      const data = await runResearch(topic);
+      const data = await runResearchStream(topic, (progress) => {
+        if (progress.message) setLoadingMessage(progress.message);
+        if (
+          progress.step === "searching" ||
+          progress.step === "analyzing" ||
+          progress.step === "generating"
+        ) {
+          setLoadingStep(progress.step);
+        }
+      });
       setReport(data.report);
       setSources(data.sources ?? []);
     } catch (err) {
@@ -43,7 +56,9 @@ export default function Home() {
 
         <ResearchForm onSubmit={handleResearch} isLoading={isLoading} />
 
-        {isLoading && <LoadingState />}
+        {isLoading && (
+          <LoadingState currentStep={loadingStep} message={loadingMessage} />
+        )}
 
         {error && (
           <div className="mt-8 p-6 bg-red-50 border border-red-200 rounded-lg">

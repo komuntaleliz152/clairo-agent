@@ -142,14 +142,20 @@ For the Vercel demo, set `NEXT_PUBLIC_API_URL` to your deployed backend URL (Rai
 
 ## 🚢 Deployment
 
+See **[DEPLOY.md](./DEPLOY.md)** for full steps.
+
+**Summary:** Deploy `backend/` to **Render**, set `GROQ_API_KEY`, then add `NEXT_PUBLIC_API_URL` on **Vercel** to your Render URL and redeploy.
+
 ### Frontend (Vercel)
 ```bash
 cd frontend
 vercel --prod
 ```
 
-### Backend
-Deploy to Railway, Render, or similar Python hosting service.
+Set `NEXT_PUBLIC_API_URL=https://your-api.onrender.com` in Vercel project settings.
+
+### Backend (Render)
+Use `backend/render.yaml` or follow DEPLOY.md.
 
 ## 🏗️ Development Status
 
@@ -161,7 +167,8 @@ Deploy to Railway, Render, or similar Python hosting service.
 - ✅ Groq AI report generation
 - ✅ Web search (DuckDuckGo; optional Tavily API)
 - ✅ Research agent pipeline (search → analyze → report)
-- ⏳ Backend deployment (set `NEXT_PUBLIC_API_URL` on Vercel)
+- ✅ Live loading step timeline (SSE stream)
+- ⏳ Backend deployment on Render (see DEPLOY.md)
 
 ## 🤝 Contributing
 
