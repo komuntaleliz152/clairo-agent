@@ -43,16 +43,46 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            AI Research Agent
-          </h1>
-          <p className="text-xl text-gray-600">
-            Autonomous research powered by AI. Enter a topic and get a comprehensive report.
-          </p>
+    <div className="min-h-screen">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 right-0 h-[480px] w-[480px] rounded-full bg-brand-200/40 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-violet-200/30 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)`,
+            backgroundSize: "32px 32px",
+          }}
+        />
+      </div>
+
+      {/* Header */}
+      <header className="border-b border-slate-200/60 bg-white/70 backdrop-blur-md">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white shadow-md shadow-brand-600/30">
+              C
+            </div>
+            <div>
+              <p className="font-[family-name:var(--font-fraunces)] text-lg font-semibold leading-tight text-slate-900">
+                Clairo
+              </p>
+              <p className="text-xs text-slate-500">AI Research Agent</p>
+            </div>
+          </div>
         </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+        <section className="mb-10 text-center">
+          <h1 className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+            Research any topic in minutes
+          </h1>
+          <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-slate-600">
+            Clairo searches the web, analyzes sources, and delivers a structured report — autonomously.
+          </p>
+        </section>
 
         <ResearchForm onSubmit={handleResearch} isLoading={isLoading} />
 
@@ -61,16 +91,28 @@ export default function Home() {
         )}
 
         {error && (
-          <div className="mt-8 p-6 bg-red-50 border border-red-200 rounded-lg">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Error</h3>
-            <p className="text-red-600">{error}</p>
+          <div
+            role="alert"
+            className="mt-6 flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800"
+          >
+            <span className="text-xl" aria-hidden>
+              ⚠️
+            </span>
+            <div>
+              <h3 className="font-semibold">Something went wrong</h3>
+              <p className="mt-1 text-sm text-red-700">{error}</p>
+            </div>
           </div>
         )}
 
         {report && !isLoading && (
           <ResearchReport report={report} sources={sources} />
         )}
-      </div>
-    </main>
+      </main>
+
+      <footer className="border-t border-slate-200/60 py-8 text-center text-xs text-slate-500">
+        Clairo · Autonomous research with cited sources
+      </footer>
+    </div>
   );
 }

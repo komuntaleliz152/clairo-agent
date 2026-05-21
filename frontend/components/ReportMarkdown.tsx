@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 function formatInline(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -8,7 +10,7 @@ function formatInline(text: string): string {
 
 export default function ReportMarkdown({ content }: { content: string }) {
   const lines = content.split("\n");
-  const elements: React.ReactNode[] = [];
+  const elements: ReactNode[] = [];
   let listItems: string[] = [];
   let key = 0;
 
