@@ -45,9 +45,10 @@ class GroqClient:
         - Key Findings
         - Detailed Analysis
         - Conclusions
-        - Sources (if provided)
+        - Sources (cite the numbered sources from the web results when provided)
         
-        Format the report in a clear, professional manner."""
+        Format the report in a clear, professional manner. Be factual and base
+        conclusions on the provided search results when available."""
         
         if search_results:
             user_prompt = f"""Research Topic: {topic}

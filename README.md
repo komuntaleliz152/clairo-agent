@@ -124,13 +124,21 @@ python main.py
 
 ## 📝 Environment Variables
 
-### Backend (.env)
+### Backend (`backend/.env`)
 ```
 GROQ_API_KEY=your_groq_api_key
+# Optional — improves search quality:
+# TAVILY_API_KEY=your_tavily_api_key
 PORT=8000
-HOST=0.0.0.0
 FRONTEND_URL=http://localhost:3000
 ```
+
+### Frontend (`frontend/.env.local`)
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+For the Vercel demo, set `NEXT_PUBLIC_API_URL` to your deployed backend URL (Railway, Render, etc.).
 
 ## 🚢 Deployment
 
@@ -147,13 +155,13 @@ Deploy to Railway, Render, or similar Python hosting service.
 
 - ✅ Frontend UI with research form
 - ✅ Loading states and animations
-- ✅ Report display component
+- ✅ Report display with sources
 - ✅ Frontend deployed to Vercel
-- ✅ Backend FastAPI setup
-- ⏳ Groq AI integration (in progress)
-- ⏳ Web search functionality (in progress)
-- ⏳ Agent orchestration (in progress)
-- ⏳ Backend deployment (pending)
+- ✅ Backend FastAPI with `/api/research`
+- ✅ Groq AI report generation
+- ✅ Web search (DuckDuckGo; optional Tavily API)
+- ✅ Research agent pipeline (search → analyze → report)
+- ⏳ Backend deployment (set `NEXT_PUBLIC_API_URL` on Vercel)
 
 ## 🤝 Contributing
 
